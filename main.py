@@ -27,6 +27,7 @@ rocket_y = 0
 rocket_was_fired = False
 
 ALIEN_STEP = 0.1
+alien_speed = ALIEN_STEP
 alien_iamge = pygame.image.load('images/alien2.png')
 alien_width, alien_height = alien_iamge.get_size()
 alien_x = randint(0, screen_width - alien_width)  # cordinatele de la inceput
@@ -34,6 +35,8 @@ alien_y = 0
 alien_was_fired = False
 
 game_is_running = True
+
+game_score = 0
 
 while game_is_running:
     for event in pygame.event.get():
@@ -59,7 +62,7 @@ while game_is_running:
     if fighter_is_move_right and fighter_x <= screen_width - fighter_width - FIGHTER_STEP:
         fighter_x += FIGHTER_STEP
 
-    alien_y += ALIEN_STEP
+    alien_y += alien_speed
 
     if rocket_was_fired and rocket_y + rocket_height < 0:
         rocket_was_fired = False
@@ -67,7 +70,7 @@ while game_is_running:
     if rocket_was_fired:
         rocket_y -= ROCKET_STEP
 
-        # screen.blit(screen_background, (0, 0))
+    # screen.blit(screen_background, (0, 0))
     screen.fill((23, 52, 71))
     screen.blit(fighter_image, (fighter_x, fighter_y))
     screen.blit(alien_iamge, (alien_x, alien_y))
@@ -75,16 +78,29 @@ while game_is_running:
     if rocket_was_fired:
         screen.blit(rocket_iamge, (rocket_x, rocket_y))
 
+    game_score_text = game_font.render(f"You Score: {game_score}", True, 'white')
+    screen.blit(game_score_text, (20, 20))
+
     pygame.display.update()
 
     if alien_y + alien_height > fighter_y:
-        game_is_running = False
+        game_is_running = False  # intrerupem joaca
 
+    # Logica de niimerirea in corabia extraterestrului
+    if (rocket_was_fired and
+            alien_x < rocket_x < alien_x + alien_width - rocket_width and
+            alien_y < rocket_y < alien_y + alien_height - rocket_height / 2):
+        rocket_was_fired = False
+        alien_x, alien_y = randint(0, screen_width - alien_width), 0  # cordinatele de la inceput
+        alien_speed += ALIEN_STEP / 2  # La fiecare iteratie marim viteza cu jumate de pas
+        game_score += 1
+
+# afisham inscriptsia 'Game Over'
 game_over_text = game_font.render("Game Over", True, 'white')
 game_over_rectangle = game_over_text.get_rect()
-game_over_rectangle.center = (screen_width/2, screen_height/2)
+game_over_rectangle.center = (screen_width / 2, screen_height / 2)
 screen.blit(game_over_text, game_over_rectangle)
 pygame.display.update()
-pygame.time.wait(3000) # 3 secunde asteptam
+pygame.time.wait(3000)  # 3 secunde asteptam
 
 pygame.quit()
